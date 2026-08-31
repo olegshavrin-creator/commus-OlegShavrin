@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# IDE / OS local state
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Raw / large tabular data kept outside ordinary Git because of size and rebuildability.
+# If truly sensitive data appears later, add an explicit rule here before committing it.
+*.xlsb
+*.parquet
+*.feather
+*.arrow
+data/raw/
+data/private/
+data/external/
+data/cache/
+
+# Heavy model binaries and checkpoints
+*.pkl
+*.pickle
+*.joblib
+*.cbm
+*.pt
+*.pth
+*.onnx
+*.safetensors
+artifacts/models/
+artifacts/checkpoints/
+artifacts/cache/
+models/
+checkpoints/
+cache/
+
+# Run logs, temporary files and archives
+logs/
+*.log
+*.tmp
+*.temp
+*.zip
+
+# Research evidence is intentionally trackable.
+# Do NOT broadly ignore reports/.
+# In particular, these paths may be committed when produced by a verified experiment:
+# - reports/summary/
+# - reports/generated/
+# - reports/figures/
+# - reports/presentation/
+# Local research scratch / superseded generated files
+reports/generated/*.txt
+reports/generated/*_preliminary.*
+reports/generated/stage1_baseline_leaderboard.csv
+reports/generated/stage1_baseline_results.json
+
+.review_bundle_build/
