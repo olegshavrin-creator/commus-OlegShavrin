@@ -267,18 +267,37 @@ Evidence: `docs/STAGE13_TABFM_RUNBOOK.md` и `reports/summary/stage13_tabfm_summ
 
 ---
 
-## 11. Stage 14 V1 — TabPFN-3 large-context hypothesis — TO LOCK / NOT STARTED
+## 11. TabPFN-3 Stage 14 candidate — REJECTED BEFORE RUN
 
-Это единственный narrow reopen по новой scientific hypothesis: даёт ли pretrained large-context TabPFN-3 дополнительное OOF-качество относительно accepted `GBDT_mean` на тех же 47 разрешённых признаках KOMUS? Он качественно отличается от Stage 13 TabFM с bounded sampled context (`max_num_rows=100`) и не открывает model zoo.
+Статус: `TABPFN3_STAGE14_REJECTED_BY_CPU_CONSTRAINT`.
 
-До implementation обязателен отдельный Architect Experiment Lock: official version/repository/checkpoint, license, hardware/device, preprocessing, context construction, memory mode, ensemble/configuration, seeds/reproducibility, exact folds и acceptance/decision rule. Никакой Stage 14 code сейчас не добавляется.
+Locked large-context TabPFN-3 contract требовал GPU/H100. Основной KOMUS research path CPU-only; GPU fallback запрещён, а subsampling или context reduction изменили бы проверяемую hypothesis. TabPFN-3 не запускался, OOF не выполнялся, quality `UNKNOWN`; это не `inferior` и не `no_material_benefit`, final test не использовался.
 
-Decision checkpoint:
+`notebooks/14_Сравнение_TabPFN3_с_GBDT_baseline_V1.ipynb` и `requirements-tabpfn3-v1.txt` остаются tracked historical rejected pre-run artifacts. Это не active Stage 14 implementation; запускать их не следует.
 
-- при material gain foundation-model branch действительно переоткрывается;
-- при отсутствии material gain не запускать автоматически близкие TFM; вернуться к STOP либо отдельно решить вопрос xRFM как qualitatively different reserve.
+## 12. Stage 14 V1 — xRFM historical pre-run plan — superseded
 
-Data research, presentation и defence остаются параллельными открытыми направлениями.
+Architect status `XRFM_V1_LOCKED` / `READY_FOR_TECHNICAL_COORDINATOR` относится только к historical pre-run plan; он superseded последующим hardware closeout.
+
+Это был один narrow controlled reopen, не model-zoo: планировалась проверка material reserve тех же 47 разрешённых features через iterative kernel / metric feature learning + supervised recursive localization. Он больше не является active roadmap state.
+
+Key implementation lock:
+
+- `xrfm==0.4.5`; CPU only, `device='cpu'`, 8 threads;
+- `split_method='linear'`, `n_trees=1`, `max_leaf_size=8192`, leaf RFM iterations=3;
+- no HPO; smoke → full Fold-1 feasibility → compute gate;
+- full OOF — только после отдельного manual review;
+- ceiling: 12 CPU wall-clock hours; `STOPPED_BY_COMPUTE_COST` не является quality verdict.
+
+Сохраняются `Data_final.xlsb` и его SHA, 289614 working rows, `DefMark`, исключение `INN`, exact accepted 47 features, запрет `Q_B1_norm`/`Q_B2_norm` как predictors, same 3 folds seed 42, saved `GBDT_mean` Gini 0.8063993952 и закрытый final test. GPU-only experiment не становится следующим основным Stage без отдельного нового решения пользователя.
+
+При xRFM `no_material_benefit`/`inferior` default direction — data / feature / blind-spot research, не новая модель. Data research, presentation и defence остаются параллельными открытыми направлениями.
+
+## 13. Stage 14 V1 — xRFM — CLOSED: HARDWARE_CONSTRAINT
+
+Environment PASS и pre-run implementation ACCEPT, но guard остановил первый Smoke до model.fit: 6 physical cores / 15.34 GiB RAM не выполняют contract 8 cores / 32 GiB, а 16 GiB available RAM перед feasibility на этой машине невозможно. Статус `STOPPED_BY_COMPUTE_COST / HARDWARE_CONSTRAINT`, quality `UNKNOWN`; training, predict_proba, feasibility, OOF и final test отсутствуют. Новый model candidate автоматически не назначается.
+
+Следующий содержательный research direction: точнее охарактеризовать common blind spot текущих 47 features и тип недостающей информации — профиль 805 common blind-spot defaults, отличие от корректно поднятых defaults, устойчивые feature-space regions, missingness/pattern diagnostics и future valid feature-source hypotheses. Новый predictor в этом closeout не проектируется.
 
 ---
 
@@ -296,3 +315,14 @@ Stage считается закрытым, когда:
 8. обновлены только реально затронутые project docs;
 9. Git diff проверен;
 10. только после этого начинается следующий research question.
+
+---
+
+## Stage 16 — Blind Spot Information Gap Diagnostics
+
+**Цель:** понять, чем отличаются клиенты, которых не смогли определить текущие
+модели.
+
+Stage 16 использует сохранённые OOF и error artifacts для анализа общей зоны
+из **805** ошибок. В рамках этапа не выполняются новое обучение, создание новых
+признаков или изменение принятого протокола.

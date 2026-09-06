@@ -503,6 +503,44 @@ Locked technical pipeline Stage 13 V1 валидирован: runtime/dataset gu
 
 ### D-050 — Разрешён один narrow reopen: TabPFN-3 large-context hypothesis
 
-Разрешён ровно один следующий research question: даёт ли pretrained large-context TabPFN-3 дополнительное OOF-качество относительно accepted `GBDT_mean` на тех же 47 разрешённых признаках KOMUS?
+На тот момент был разрешён ровно один narrow controlled experiment: проверить, даёт ли pretrained large-context TabPFN-3 дополнительное OOF-качество относительно accepted `GBDT_mean` на тех же 47 разрешённых признаках KOMUS.
 
-Причина: это новая scientific hypothesis о large-context pretrained ICL, а не очередная architecture. Stage 14 V1 имеет статус `TO LOCK / NOT STARTED`. До любой implementation обязателен отдельный Architect Experiment Lock с official version/repository/checkpoint, license, hardware/device, preprocessing, context construction, memory mode, ensemble/configuration, seeds/reproducibility, exact folds и acceptance/decision rule.
+Причина: это была новая scientific hypothesis о large-context foundation-model mechanism, а не очередная architecture и не reopening model zoo. Stage 14 V1 был разрешён к отдельному Architect Experiment Lock до любой implementation.
+
+### D-051 — TabPFN-3 Stage 14 отклонён до запуска по CPU constraint
+
+Статус: `TABPFN3_STAGE14_REJECTED_BY_CPU_CONSTRAINT`.
+
+TabPFN-3 не продолжается как active Stage 14 и не запускается. Честный locked large-context experiment требовал GPU/H100, что несовместимо с hard CPU-only compute constraint основного KOMUS research path. GPU fallback не разрешён; subsampling или уменьшение context изменили бы hypothesis.
+
+TabPFN-3 не запускался, полный OOF не выполнялся, quality остаётся `UNKNOWN`. Это не `inferior`, не `no_material_benefit` и не evidence quality относительно `GBDT_mean`; final test не использовался. Historical pre-run implementation artifacts — `notebooks/14_Сравнение_TabPFN3_с_GBDT_baseline_V1.ipynb` и `requirements-tabpfn3-v1.txt` — существовали, но experiment не был запущен; они не являются active Stage 14 implementation.
+
+GPU-only experiment не может стать следующим основным Stage без отдельного нового решения пользователя.
+
+### D-052 — Разрешён один narrow CPU-only reopen: xRFM V1
+
+`CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES` сохраняется как базовое решение для ordinary model search. Разрешён только один narrow controlled reopen: Stage 14 V1 `xRFM CPU_ONLY_RESEARCH_EXPERIMENT`, Architect status `XRFM_V1_LOCKED` / `READY_FOR_TECHNICAL_COORDINATOR`.
+
+Проверяется новая hypothesis family: iterative kernel / metric feature learning + supervised recursive localization на том же locked data/fold/comparator contract. Frozen implementation lock: `xrfm==0.4.5`; CPU `device='cpu'`; 8 threads; `split_method='linear'`; `n_trees=1`; `max_leaf_size=8192`; leaf RFM iterations=3; no HPO; smoke → full Fold-1 feasibility → compute gate; full OOF только после отдельного manual review; ceiling 12 CPU wall-clock hours. `STOPPED_BY_COMPUTE_COST` — operational outcome, не quality verdict.
+
+Сохраняются `Data_final.xlsb`, его SHA, 289614 working rows, `DefMark`, исключение `INN`, exact accepted 47 features, запрет `Q_B1_norm`/`Q_B2_norm` как predictors, exact 3 folds seed 42, saved `GBDT_mean` Gini 0.8063993952 и закрытый final test. При xRFM `no_material_benefit`/`inferior` default direction — data / feature / blind-spot research, не новая модель.
+
+### D-053 — Stage 14 xRFM V1 остановлен по hardware constraint
+
+Статус: `STOPPED_BY_COMPUTE_COST / HARDWARE_CONSTRAINT`. Environment setup прошёл, pre-run implementation принят. Hardware guard остановил Smoke до `model.fit()` на AMD Ryzen 5 5500U: 6 физических cores / 12 logical processors и 15.34 GiB physical RAM не соответствуют accepted contract 8 physical cores / 32 GiB RAM; 16 GiB available RAM перед feasibility физически недостижимы. Training, `predict_proba`, feasibility и OOF не выполнялись; quality `UNKNOWN`, final test не использовался. Frozen xRFM V1 не ослабляется и новый CPU-safe xRFM experiment не открывается. D-052 остаётся историческим разрешением narrow reopen; active default снова `CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES`, следующий путь — data / feature / blind-spot research.
+
+### D-054 — Model Research Coverage и обязательный FEASIBILITY_BEFORE_EXPERIMENT_LOCK
+
+Model zoo не является целью: full-protocol tested evidence, compute/hardware exclusions и not-opened candidates фиксируются раздельно; отсутствие run не является отрицательным quality evidence. Lessons TabPFN-3 и xRFM требуют future gate `FEASIBILITY_BEFORE_EXPERIMENT_LOCK` до implementation: novelty, actual CPU-only hardware (сейчас 6C / ~16 GiB), primary-source mechanics, честная full-protocol feasibility и expected information gain. `CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES` сохраняется; mathematical ceiling не заявляется.
+
+### D-055 — Transition from model search to blind-spot diagnostics
+
+Принято решение не открывать новые model experiments без новой проверяемой
+гипотезы, которая меняет основания для решения. Вместо дальнейшего перебора
+architectures начинается диагностика **805** общих ошибок моделей с
+использованием сохранённых OOF и error artifacts.
+
+Основание: на текущих 47 признаках разные проверенные семейства моделей показали
+сходные ограничения, поэтому дальнейший model search имеет низкий ожидаемый
+информационный эффект. Решение не утверждает математический потолок качества и
+не исключает будущую пользу модели при новой гипотезе.

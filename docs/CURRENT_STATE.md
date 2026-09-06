@@ -1,6 +1,6 @@
 # KOMUS — CURRENT STATE
 
-Дата фиксации: **2026-09-04**
+Дата фиксации: **2026-09-06**
 
 Этот файл содержит только актуальное подтверждённое состояние проекта.
 Он обновляется после принятого исследовательского этапа или существенного изменения требований.
@@ -336,4 +336,48 @@ Reopen conditions:
 
 Статус Stage 13 V1: `STOPPED_BY_COMPUTE_COST`. Полный OOF на текущей CPU-среде не запускать; `RUN_FULL_OOF=False` сохранить. Воспроизводимый setup helper существует: `scripts/prepare_stage13_tabfm.ps1`.
 
-Следующий model question — только Stage 14 V1, TabPFN-3 large-context, со статусом `TO LOCK / NOT STARTED`: это narrow reopen по новой scientific hypothesis и требует отдельного Architect Experiment Lock до любой реализации. `CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES` остаётся действующим для обычного architecture search на тех же 47 признаках. Data research остаётся открытым.
+### Stage 14 V1 — xRFM CPU-only controlled reopen
+
+TabPFN-3 Stage 14 candidate закрыт до запуска: `TABPFN3_STAGE14_REJECTED_BY_CPU_CONSTRAINT`. Его честный locked large-context contract требовал GPU/H100; CPU-only является основным research path KOMUS, а subsampling или уменьшение context изменили бы hypothesis. GPU fallback запрещён. TabPFN-3 не запускался, OOF не выполнялся, quality остаётся `UNKNOWN` — это не `inferior` и не `no_material_benefit`; final test не использовался. `notebooks/14_Сравнение_TabPFN3_с_GBDT_baseline_V1.ipynb` и `requirements-tabpfn3-v1.txt` остаются tracked historical rejected pre-run artifacts и не являются активной implementation; их не запускать.
+
+Stage 14 V1 **был разрешён** как один narrow controlled reopen: `xRFM CPU_ONLY_RESEARCH_EXPERIMENT`, с lock `xrfm==0.4.5`, `device='cpu'`, 8 threads, `split_method='linear'`, `n_trees=1`, `max_leaf_size=8192` и leaf RFM iterations=3. Это historical pre-run plan; последующий hardware closeout зафиксирован ниже и данный lock больше не является current active state.
+
+### Stage 14 V1 — xRFM hardware closeout
+
+Статус: `STOPPED_BY_COMPUTE_COST / HARDWARE_CONSTRAINT`; quality: `UNKNOWN`. Environment setup прошёл, pre-run implementation принят, однако hardware guard остановил первый разрешённый Smoke до model.fit: AMD Ryzen 5 5500U имеет 6 физических cores и 15.34 GiB RAM при contract 8 cores / 32 GiB; требование 16 GiB available RAM перед feasibility на этой машине физически невыполнимо. Training, predict_proba, smoke quality, feasibility и OOF отсутствуют; final test не использован. Это ничего не утверждает о predictive quality xRFM. Frozen lock не ослабляется; active default восстановлен: `CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES`. Следующее направление — data / feature / blind-spot research.
+
+Создан Model Research Coverage & Exclusion Register V1 и действует `FEASIBILITY_BEFORE_EXPERIMENT_LOCK`. Новый Stage 15 не открыт; предполагаемый следующий вопрос — blind-spot / information-gap diagnostics.
+
+---
+
+## Current model-research status
+
+`CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES`
+
+Подбор новых моделей на текущем наборе из 47 разрешённых признаков остановлен.
+Проверенные семейства моделей показали сходные ограничения, а общая зона ошибок
+не объясняется одной конкретной моделью.
+
+Stage 16 — blind spot diagnostics — завершён.
+
+Анализ общей группы ошибок показал:
+
+- существует группа из 805 клиентов, не обнаруженных тремя базовыми моделями;
+- группа имеет наблюдаемый профиль, отличный от остальных дефолтов;
+- различия связаны с комбинацией характеристик бизнеса, финансовых показателей,
+  исполнительной активности и организационных факторов;
+- проблема не объясняется пропусками данных;
+- внутри группы не найдено простого устойчивого разделения на отдельные типы.
+
+Вывод:
+
+текущий набор из 47 признаков содержит полезный сигнал, но имеет ограничения
+для описания части сложных клиентов.
+
+Следующий приоритет — исследование дополнительных источников информации и
+потенциальных новых факторов, а не дальнейший поиск моделей на неизменном
+feature contract.
+
+Это не является математическим доказательством потолка качества и не отменяет
+возможную пользу модели при появлении новой проверяемой гипотезы, новых данных
+или нового временного основания.

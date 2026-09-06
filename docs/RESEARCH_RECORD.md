@@ -300,4 +300,115 @@ Stage 13 OOF/result artifacts отсутствуют, потому что full O
 
 ### Next research status
 
-`CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES` остаётся действующим против обычного model-zoo search. Один narrow reopen зафиксирован как Stage 14 V1 — TabPFN-3 large-context hypothesis, `TO LOCK / NOT STARTED`; до implementation требуется отдельный Architect Experiment Lock. Data research остаётся открытым.
+`CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES` остаётся действующим против обычного model-zoo search. TabPFN-3 Stage 14 candidate закрыт как `TABPFN3_STAGE14_REJECTED_BY_CPU_CONSTRAINT`: locked large-context path требовал GPU/H100, а основной research path CPU-only; уменьшение context/subsampling меняет hypothesis, GPU fallback запрещён. TabPFN-3 не запускался, OOF не выполнялся, quality `UNKNOWN` (не `inferior` и не `no_material_benefit`), final test не использовался. Его tracked notebook и requirements сохранены исключительно как historical rejected pre-run artifacts; запускать их не следует.
+
+Единственный narrow controlled reopen — Stage 14 V1: `xRFM CPU_ONLY_RESEARCH_EXPERIMENT`, Architect status `XRFM_V1_LOCKED` / `READY_FOR_TECHNICAL_COORDINATOR`. Hypothesis: iterative kernel / metric feature learning + supervised recursive localization. Lock включает `xrfm==0.4.5`, CPU `device='cpu'`, 8 threads, `split_method='linear'`, `n_trees=1`, `max_leaf_size=8192`, три leaf RFM iterations, отсутствие HPO, smoke → full Fold-1 feasibility → compute gate, manual review до full OOF и 12-hour CPU ceiling. `STOPPED_BY_COMPUTE_COST` не является quality verdict. Final test остаётся закрытым; при `no_material_benefit`/`inferior` default return — data / feature / blind-spot research, не новая модель.
+
+### Stage 14 V1 — xRFM hardware closeout
+
+#### FACTS
+
+Environment setup PASS и pre-run implementation ACCEPT. Первый разрешённый Smoke остановлен в hardware guard до model.fit: AMD Ryzen 5 5500U имеет 6 physical cores / 12 logical processors, 15.34 GiB physical RAM и 4.14 GiB available RAM; contract требует 8 cores, 32 GiB RAM и 16 GiB available перед feasibility. Training, predict_proba, smoke quality, feasibility и OOF не выполнялись; final test unused; quality `UNKNOWN`.
+
+#### INTERPRETATION
+
+Frozen full xRFM V1 нельзя честно исполнить на текущей машине без изменения experiment contract.
+
+#### LIMITATIONS
+
+Hardware stop ничего не говорит о predictive quality xRFM и не доказывает mathematical ceiling.
+
+#### NEXT STEP
+
+Восстановлен `CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES`; следующий content path — data / feature / blind-spot research.
+
+---
+
+## Transition: Model coverage → Blind spot information analysis
+
+### FACTS
+
+- Проверены несколько семейств моделей при текущем контракте из 47 признаков.
+- GBDT baseline остаётся устойчивым comparator.
+- Существует общая группа из **805** ошибок моделей.
+- Качество этой группы не объясняется одной конкретной моделью.
+
+### INTERPRETATION
+
+- Вероятное ограничение связано с доступной информацией, а не только с выбором
+  одной architecture.
+- Требуется анализ структуры ошибок и различий внутри общей blind spot.
+
+### LIMITATIONS
+
+- Не доказан математический потолок качества.
+- Не доказано отсутствие пользы новых моделей вообще.
+
+### NEXT STEP
+
+- Диагностика **805** blind spot без нового обучения, новых признаков или
+  изменения протокола.
+
+### Model Research Coverage & Exclusion Register V1
+
+#### FACTS
+
+Несколько model families имеют full OOF evidence; TabFM остановлен по compute cost, TabPFN/xRFM имеют hardware/compute exclusions, modern shortlist screened. Quality непрогнанных candidates `UNKNOWN`.
+
+#### INTERPRETATION
+
+Coverage достаточен для сохранения current stopping rule; register не доказывает, что непрогнанные модели проиграли бы.
+
+#### LIMITATIONS
+
+Это не exhaustive model zoo; для non-run candidates нет quality evidence; random OOF не доказывает temporal stability.
+
+#### NEXT STEP
+
+Blind-spot / information-gap research после отдельного Experiment Lock.
+
+---
+
+## Stage 16 — диагностика профиля blind spot
+
+Дата завершения: 2026-09-06
+
+### Исследовательский вопрос
+
+Почему часть клиентов с `DefMark = 1` остаётся незамеченной всеми тремя базовыми моделями?
+
+### Что проверялось
+
+Проведён анализ общей группы из 805 клиентов, которые:
+
+- имеют `DefMark = 1`;
+- не были обнаружены CatBoost, XGBoost и LightGBM;
+- были восстановлены по принятому правилу Stage 3 на основе OOF-результатов.
+
+### Результаты
+
+- Общая группа сложных случаев подтверждена.
+- Группа имеет отличающийся профиль относительно остальных дефолтов.
+- Наиболее заметные различия обнаружены по признакам:
+  - `Q_A5_norm`;
+  - `Q_D4_norm`;
+  - `D5_norm`;
+  - `D4_norm`;
+  - `Q_B3_norm`;
+  - `Q_D6_norm`.
+- Пропуски данных не объясняют наличие группы.
+- Внутри группы не найдено простого устойчивого разделения на отдельные типы.
+
+### Вывод
+
+Текущий набор из 47 разрешённых признаков содержит полезный сигнал, но недостаточен для полного описания части сложных клиентов.
+
+Дальнейшее улучшение качества вероятнее связано с расширением информационного пространства, а не только с поиском другой архитектуры модели.
+
+### Ограничения
+
+Stage 16 не доказывает:
+
+- причинное влияние отдельных признаков;
+- какие именно новые факторы улучшат модель;
+- что добавление внешних данных гарантированно повысит качество.
