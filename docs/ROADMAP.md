@@ -326,3 +326,72 @@ Stage считается закрытым, когда:
 Stage 16 использует сохранённые OOF и error artifacts для анализа общей зоны
 из **805** ошибок. В рамках этапа не выполняются новое обучение, создание новых
 признаков или изменение принятого протокола.
+
+---
+
+## 17. Stage 17 — Information Gap Map — ЗАВЕРШЁН
+
+Статус:
+
+`CURRENT_DATASET_TEMPORAL_ENRICHMENT_BLOCKED`
+
+Stage 17 закрыл следующий вопрос после blind-spot diagnostics:
+
+можно ли честно проверить дополнительные источники информации на текущем историческом датасете?
+
+Ответ: нет.
+
+Причина не в отсутствии идей новых факторов, а в отсутствии восстанавливаемого row-level временного якоря.
+
+По подтверждению заказчика:
+
+- `observation_date` / `decision_date` для текущих исторических строк восстановлена не будет;
+- точная temporal-схема формирования `DefMark` относительно каждой строки также восстановлена не будет.
+
+Следовательно:
+
+- SPARK/FNS/current external snapshots не присоединяются к текущим историческим строкам как predictors;
+- historical enrichment `Data_final.xlsb` закрыт;
+- новый model-only search на неизменных 47 признаках не открывается;
+- текущий dataset сохраняется как baseline/evidence dataset.
+
+### Следующий приоритет
+
+Не новый feature experiment на `Data_final.xlsb`.
+
+Следующий отдельный research question должен относиться к новому временно корректному dataset / data design, где существуют:
+
+- row-level observation / decision date;
+- определённый prediction horizon;
+- historical feature availability;
+- temporal target definition.
+
+До появления такого объекта data research текущего historical dataset считается закрытым по temporal-enrichment направлению.
+
+Presentation / defence evidence остаётся параллельным приоритетом.
+
+---
+
+## 18. Stage 18 — FP/FN и operating modes — ЗАВЕРШЁН
+
+Статус: `FP_FN_OPERATING_MAP_COMPLETE`.
+
+Reviewer: `ACCEPT`.
+
+Stage 18 закрыл практический вопрос управления ошибками текущего baseline:
+
+- threshold задаёт общий FP/FN trade-off;
+- Moderate 15% даёт Recall 69.94%, но не является оптимальным threshold;
+- снижение threshold не решает common blind spot 805;
+- принятое disagreement-rule не даёт полезной FN review zone;
+- область около operating threshold концентрирует ошибки и является кандидатом на дополнительную проверку.
+
+Следующий приоритет соответствует обновлённой бизнес-рамке проекта:
+
+**не расширять model zoo, а формализовать воспроизводимый конвейер проверки новых моделей и признаков.**
+
+Следующий Stage:
+
+`new feature → provenance → temporal gate → controlled experiment → OOF metrics → FP/FN → review zone → blind spot → ACCEPT / REJECT`.
+
+LLM остаётся отдельным Result Interpreter и не является credit predictor.

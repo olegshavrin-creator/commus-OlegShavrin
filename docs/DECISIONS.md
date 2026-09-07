@@ -544,3 +544,70 @@ architectures начинается диагностика **805** общих о�
 сходные ограничения, поэтому дальнейший model search имеет низкий ожидаемый
 информационный эффект. Решение не утверждает математический потолок качества и
 не исключает будущую пользу модели при новой гипотезе.
+
+---
+
+## 2026-09-07
+
+### D-056 — Stage 16 трактуется как descriptive blind-spot diagnostics
+
+Stage 16 подтвердил common blind spot из 805 дефолтов, наблюдаемый профиль группы и отсутствие объяснения через missingness.
+
+Результаты PCA / nearest-neighbor / KMeans не являются доказательством информационной недостаточности или причинной структуры группы.
+
+Silhouette для `k=2..6` не показал сильного cluster separation, но строгая устойчивость кластеров отдельно не проверялась.
+
+Корректная интерпретация: Stage 16 мотивирует information-gap hypothesis, но не доказывает её.
+
+### D-057 — Stage 17 закрывает historical enrichment текущего датасета
+
+Статус:
+
+`CURRENT_DATASET_TEMPORAL_ENRICHMENT_BLOCKED`
+
+Подтверждено отсутствие восстанавливаемой row-level `observation_date` / `decision_date` и temporal-схемы `DefMark` для текущего `Data_final.xlsb`.
+
+Поэтому современные внешние snapshots нельзя присоединять к историческим строкам по `INN` и считать историческими predictors.
+
+Новые внешние feature hypotheses существуют, но их predictive value на текущем historical dataset не проверяется.
+
+`CORE_MODEL_RESEARCH_STOPPED_CURRENT_47_FEATURES` сохраняется.
+
+Следующий новый data-research объект должен иметь корректную row-level временную структуру.
+
+Stage 17 не утверждает:
+
+- математический потолок качества;
+- недостаточность всех 47 признаков;
+- причинную природу blind spot;
+- гарантированный gain от новых источников.
+
+---
+
+## 2026-09-07
+
+### D-058 — Stage 18 принят: FP/FN рассматриваются как отдельный operating layer
+
+Статус:
+
+`FP_FN_OPERATING_MAP_COMPLETE`
+
+Reviewer verdict: `ACCEPT`.
+
+Принято разделение трёх механизмов:
+
+1. **Operating threshold** — управляет общим Recall / Precision / FN / FP trade-off.
+2. **Boundary review zone** — кандидат на дополнительную проверку, поскольку около threshold ошибки концентрируются в 4+ раза сильнее среднего.
+3. **Common blind spot** — отдельная проблема, не решаемая практически одним снижением threshold.
+
+`Moderate` 15% используется только как reference к бизнес-ориентиру Recall около 69% и не является оптимальным threshold.
+
+Правило `rank_spread >= 0.25` не принимается как practical FN review signal на текущем evidence.
+
+Размер review zone не выбирается до появления business cost / workload constraints.
+
+Следующий research priority:
+универсальный controlled pipeline проверки нового признака.
+
+Это соответствует финальной рамке проекта:
+не model zoo, а воспроизводимый процесс проверки новых ML/ИИ-подходов и новых факторов.
